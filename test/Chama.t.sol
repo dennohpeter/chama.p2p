@@ -4,4 +4,4 @@ pragma solidity ^0.8.13;
 import {Test, console} from "forge-std/Test.sol";
 import {Chama} from "@contracts/Chama.sol";
 
-contract Chamaest is Test {}
+contract ChamaTest is Test {}

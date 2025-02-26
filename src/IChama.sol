@@ -2,12 +2,24 @@
 pragma solidity ^0.8.13;
 
 interface IChama {
-    event GroupCreated(
-        uint256 id,
-        string name,
-        address creator,
-        uint256 maxMembers
-    );
+    error MaxMembersZero();
+    error CycleDaysZero();
+    error ContributionAmountZero();
+    error GroupNotFound();
+    error GroupFull();
+    error GroupInactive();
+    error GroupStarted();
+    error AlreadyMember();
+    error NotMember();
+    error NotCreator();
+    error NotEnoughBalance();
+    error InsufficientJoinFee();
+
+    event GroupCreated(uint256 indexed id, string name, address creator);
+    event GroupJoined(uint256 indexed id, address member);
+    event JoinFeePaid(uint256 indexed id, address member, uint256 amount);
+    event Contribution(uint256 indexed id, address member, uint256 amount);
+    event Payout(uint256 indexed id, address member, uint256 amount);
 
     struct Group {
         uint256 id;
@@ -23,9 +35,13 @@ interface IChama {
         uint256 cycleDays;
         uint256 maxMembers;
         uint256 contributionAmount;
+        uint256 joinFee;
+        uint256 lateFee;
         uint256 currentRound;
-        // currentRound => memberId => address
-        mapping(uint256 => mapping(uint256 => address)) roundMembers;
+        // currentRound => balance
+        mapping(uint256 => uint256) roundBalance;
+        // memberId => address
+        mapping(uint256 => address) members;
         // currentRound => memberId => address
         mapping(uint256 => mapping(uint256 => uint256)) roundContributions;
         // currentRound => memberId => address
@@ -34,15 +50,55 @@ interface IChama {
         mapping(uint256 => mapping(uint256 => bool)) roundPaid;
     }
 
-    // function createGroup(
-    //     string memory _name,
-    //     uint256 _maxMembers
-    // ) external returns (uint256);
+    struct CreateGroupParams {
+        string name;
+        string description;
+        address vault;
+        uint256 maxMembers;
+        uint256 cycleDays;
+        uint256 contributionAmount;
+        uint256 joinFee;
+        uint256 lateFee;
+    }
 
-    // function joinGroup(uint256 _id) external;
+    struct GroupParams {
+        uint256 id;
+        string name;
+        string description;
+        bool isActive;
+        address creator;
+        address vault;
+        uint256 memberId;
+        uint256 cycleDays;
+        uint256 maxMembers;
+        uint256 contributionAmount;
+        uint256 joinFee;
+        uint256 lateFee;
+        uint256 currentRound;
+    }
 
-    error GroupNotFound();
-    error GroupFull();
-    error AlreadyMember();
-    error NotMember();
+    struct PayoutParams {
+        uint256 groupId;
+    }
+
+    struct Member {
+        uint256 id;
+        address member;
+        uint256 contribution;
+        uint256 payout;
+        bool paid;
+    }
+    function createGroup(
+        CreateGroupParams memory _group
+    ) external returns (uint256);
+
+    function getGroup(uint256 _id) external view returns (GroupParams memory);
+
+    function joinGroup(uint256 _id) external payable;
+
+    function contribute(uint256 _id) external payable;
+
+    function payout(PayoutParams memory _group) external;
+
+    function distribute(uint256 _id) external;
 }
