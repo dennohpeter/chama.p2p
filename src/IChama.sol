@@ -12,10 +12,13 @@ interface IChama {
     error AlreadyMember();
     error NotMember();
     error NotCreator();
-    error NotEnoughBalance();
     error InsufficientJoinFee();
     error InsufficientContribution();
+    error InsuffientPayoutAmount(uint256 balance, uint256 payout);
     error AlreadyContributed();
+    error AllRoundsPaid();
+    error AlreadyPaid();
+    error InvalidPayoutMember();
 
     event GroupCreated(uint256 indexed id, string name, address creator);
     event GroupJoined(uint256 indexed id, address member);
@@ -48,8 +51,8 @@ interface IChama {
         mapping(address => uint256) memberIds;
         // currentRound => memberId => address
         mapping(uint256 => mapping(uint256 => uint256)) roundContributions;
-        // currentRound => memberId => address
-        mapping(uint256 => mapping(uint256 => uint256)) roundPayouts;
+        // currentRound => payoutMemberId
+        mapping(uint256 => uint256) roundPayout;
         // currentRound => memberId => address
         mapping(uint256 => mapping(uint256 => bool)) roundPaid;
     }
@@ -81,10 +84,6 @@ interface IChama {
         uint256 currentRound;
     }
 
-    struct PayoutParams {
-        uint256 groupId;
-    }
-
     struct Member {
         uint256 id;
         address member;
@@ -102,7 +101,7 @@ interface IChama {
 
     function contribute(uint256 _id) external payable;
 
-    function payout(PayoutParams memory _group) external;
+    function distribute(uint256 _id) external payable;
 
-    function distribute(uint256 _id) external;
+    function setGroupInactive(uint256 _id) external;
 }

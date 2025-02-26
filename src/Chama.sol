@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {IChama} from "@contracts/IChama.sol";
+import {SafeTransferLib} from "@solady/utils/SafeTransferLib.sol";
 
 contract Chama is IChama {
     uint256 public groupId;
@@ -9,6 +10,11 @@ contract Chama is IChama {
     mapping(uint256 => Group) public groups;
 
     constructor() {}
+
+    modifier onlyCreator(uint256 _groupId) {
+        if (groups[_groupId].creator != msg.sender) revert NotCreator();
+        _;
+    }
 
     function createGroup(
         CreateGroupParams memory _group
@@ -74,7 +80,7 @@ contract Chama is IChama {
         if (group.joinFee > 0) {
             if (msg.value < group.joinFee) revert InsufficientJoinFee();
 
-            payable(group.vault).transfer(msg.value);
+            SafeTransferLib.safeTransferETH(group.vault, msg.value);
 
             emit JoinFeePaid(_id, msg.sender, group.joinFee);
         }
@@ -86,6 +92,7 @@ contract Chama is IChama {
         emit GroupJoined(_id, msg.sender);
     }
 
+    // Make contribution to the current round
     function contribute(uint256 _id) external payable override {
         Group storage group = groups[_id];
 
@@ -103,14 +110,51 @@ contract Chama is IChama {
         if (msg.value < group.contributionAmount)
             revert InsufficientContribution();
 
-        payable(group.vault).transfer(msg.value);
+        SafeTransferLib.safeTransferETH(group.vault, msg.value);
+        group.roundBalance[currentRound] += msg.value;
 
         group.roundContributions[currentRound][memberId] = msg.value;
 
         emit Contribution(_id, msg.sender, msg.value);
     }
 
-    function payout(PayoutParams memory _group) external override {}
+    function distribute(
+        uint256 _id
+    ) external payable override onlyCreator(_id) {
+        Group storage group = groups[_id];
 
-    function distribute(uint256 _id) external override {}
+        if (group.id == 0) revert GroupNotFound();
+        if (!group.isActive) revert GroupInactive();
+        if (group.currentRound == group.maxMembers) revert AllRoundsPaid();
+
+        uint256 currentRound = group.currentRound;
+        uint256 payoutMemberId = group.roundPayout[currentRound];
+        uint256 roundBalance = group.roundBalance[currentRound];
+        address payoutMember = group.members[payoutMemberId];
+
+        if (payoutMemberId == 0) revert InvalidPayoutMember();
+
+        if (group.roundPaid[currentRound][payoutMemberId]) revert AlreadyPaid();
+        uint256 totalContributions = group.memberId * group.contributionAmount;
+
+        if (roundBalance != totalContributions)
+            revert InsuffientPayoutAmount(roundBalance, totalContributions);
+
+        SafeTransferLib.safeTransferETH(payoutMember, roundBalance);
+
+        group.roundPaid[currentRound][payoutMemberId] = true;
+
+        group.roundBalance[currentRound] = 0;
+        group.currentRound++;
+
+        emit Payout(_id, payoutMember, roundBalance);
+    }
+
+    function setGroupInactive(uint256 _id) external override onlyCreator(_id) {
+        Group storage group = groups[_id];
+
+        if (group.id == 0) revert GroupNotFound();
+
+        group.isActive = false;
+    }
 }
