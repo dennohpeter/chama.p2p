@@ -9,6 +9,8 @@ contract Chama is IChama {
 
     mapping(uint256 => Group) public groups;
 
+    mapping(address => uint256) public balances;
+
     constructor() {}
 
     modifier onlyCreator(uint256 _groupId) {
@@ -156,5 +158,17 @@ contract Chama is IChama {
         if (group.id == 0) revert GroupNotFound();
 
         group.isActive = false;
+    }
+
+    function setGroupActive(uint256 _id) external override onlyCreator(_id) {
+        Group storage group = groups[_id];
+
+        if (group.id == 0) revert GroupNotFound();
+
+        group.isActive = true;
+    }
+
+    receive() external payable {
+        balances[msg.sender] += msg.value;
     }
 }

@@ -104,4 +104,6 @@ interface IChama {
     function distribute(uint256 _id) external payable;
 
     function setGroupInactive(uint256 _id) external;
+
+    function setGroupActive(uint256 _id) external;
 }
