@@ -14,6 +14,8 @@ interface IChama {
     error NotCreator();
     error NotEnoughBalance();
     error InsufficientJoinFee();
+    error InsufficientContribution();
+    error AlreadyContributed();
 
     event GroupCreated(uint256 indexed id, string name, address creator);
     event GroupJoined(uint256 indexed id, address member);
@@ -42,6 +44,8 @@ interface IChama {
         mapping(uint256 => uint256) roundBalance;
         // memberId => address
         mapping(uint256 => address) members;
+        // address => memberId
+        mapping(address => uint256) memberIds;
         // currentRound => memberId => address
         mapping(uint256 => mapping(uint256 => uint256)) roundContributions;
         // currentRound => memberId => address

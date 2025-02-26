@@ -68,11 +68,7 @@ contract Chama is IChama {
         if (group.memberId >= group.maxMembers) revert GroupFull();
         if (!group.isActive) revert GroupInactive();
         if (group.currentRound > 0) revert GroupStarted();
-
-        // check if member has already joined
-        for (uint256 i = 1; i <= group.memberId; i++) {
-            if (group.members[i] == msg.sender) revert AlreadyMember();
-        }
+        if (group.memberIds[msg.sender] > 0) revert AlreadyMember();
 
         // check if member has to pay a join fee
         if (group.joinFee > 0) {
@@ -85,11 +81,34 @@ contract Chama is IChama {
 
         group.memberId++;
         group.members[group.memberId] = msg.sender;
+        group.memberIds[msg.sender] = group.memberId;
 
         emit GroupJoined(_id, msg.sender);
     }
 
-    function contribute(uint256 _id) external payable override {}
+    function contribute(uint256 _id) external payable override {
+        Group storage group = groups[_id];
+
+        if (group.id == 0) revert GroupNotFound();
+        if (!group.isActive) revert GroupInactive();
+
+        uint256 currentRound = group.currentRound;
+        uint256 memberId = group.memberIds[msg.sender];
+
+        if (memberId == 0) revert NotMember();
+
+        if (group.roundContributions[currentRound][memberId] > 0)
+            revert AlreadyContributed();
+
+        if (msg.value < group.contributionAmount)
+            revert InsufficientContribution();
+
+        payable(group.vault).transfer(msg.value);
+
+        group.roundContributions[currentRound][memberId] = msg.value;
+
+        emit Contribution(_id, msg.sender, msg.value);
+    }
 
     function payout(PayoutParams memory _group) external override {}
 
