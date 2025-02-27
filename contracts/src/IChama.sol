@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.24;
 
 interface IChama {
     error MaxMembersZero();
@@ -19,11 +19,16 @@ interface IChama {
     error AllRoundsPaid();
     error AlreadyPaid();
     error InvalidPayoutMember();
+    error ExcessContribution(uint256 required, uint256 excess);
+    error InvalidMembers();
+    error RoundsMembersMismatch();
+    error DuplicatePayoutMember(address member);
+    error UknownMember(address member);
 
     event GroupCreated(uint256 indexed id, string name, address creator);
     event GroupJoined(uint256 indexed id, address member);
     event JoinFeePaid(uint256 indexed id, address member, uint256 amount);
-    event Contribution(uint256 indexed id, address member, uint256 amount);
+    event Contributed(uint256 indexed id, address member, uint256 amount);
     event Payout(uint256 indexed id, address member, uint256 amount);
 
     struct Group {
@@ -49,12 +54,14 @@ interface IChama {
         mapping(uint256 => address) members;
         // address => memberId
         mapping(address => uint256) memberIds;
-        // currentRound => memberId => address
+        // currentRound => memberId => contribution
         mapping(uint256 => mapping(uint256 => uint256)) roundContributions;
         // currentRound => payoutMemberId
         mapping(uint256 => uint256) roundPayout;
-        // currentRound => memberId => address
-        mapping(uint256 => mapping(uint256 => bool)) roundPaid;
+        // payoutMemberId => currentRound
+        mapping(uint256 => uint256) memberIdRoundPayout;
+        // address => round
+        mapping(address => uint256) roundPaid;
     }
 
     struct CreateGroupParams {
@@ -87,10 +94,24 @@ interface IChama {
     struct Member {
         uint256 id;
         address member;
-        uint256 contribution;
-        uint256 payout;
+        uint256 groupId;
+    }
+
+    struct Contribution {
+        uint256 memberId;
+        address member;
+        uint256 amount;
+        uint256 round;
+    }
+
+    struct MemberPayout {
+        uint256 memberId;
+        address member;
+        uint256 amount;
+        uint256 round;
         bool paid;
     }
+
     function createGroup(
         CreateGroupParams memory _group
     ) external returns (uint256);
@@ -106,4 +127,24 @@ interface IChama {
     function setGroupInactive(uint256 _id) external;
 
     function setGroupActive(uint256 _id) external;
+
+    function contributions(
+        uint256 _id,
+        uint256 _round
+    ) external view returns (Contribution[] memory);
+
+    function members(uint256 _id) external view returns (Member[] memory);
+
+    function roundBalance(
+        uint256 _id,
+        uint256 _round
+    ) external view returns (uint256);
+
+    function setPayoutOrder(
+        uint256 _groupId,
+        uint256[] memory _rounds,
+        address[] memory _members
+    ) external;
+
+    function payouts(uint256 _id) external view returns (MemberPayout[] memory);
 }
