@@ -8,7 +8,7 @@ Our goal? To help investors—across emerging markets and beyond—choose the be
 
 ---
 
-## Live Link:  [peerfi.netlify.com](https://peerfi.netlfiy.com)
+## Live Link:  [peerfi.netlify.app](https://peerfi.netlfiy.app)
 
 ## Problem We’re Solving
 
