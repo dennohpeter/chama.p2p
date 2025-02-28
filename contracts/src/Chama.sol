@@ -187,7 +187,7 @@ contract Chama is IChama {
 
         if (group.id == 0) revert GroupNotFound();
 
-        _contributions = new Contribution[](group.memberId - 1);
+        _contributions = new Contribution[](group.memberId);
 
         for (uint256 memberId; memberId < group.memberId; memberId++) {
             uint256 contribution = group.roundContributions[_round][
@@ -210,9 +210,9 @@ contract Chama is IChama {
 
         if (group.id == 0) revert GroupNotFound();
 
-        _members = new Member[](group.memberId - 1);
+        _members = new Member[](group.memberId);
 
-        for (uint256 memberId; memberId < group.memberId; memberId++) {
+        for (uint256 memberId = 1; memberId <= group.memberId; memberId++) {
             _members[memberId] = Member({
                 id: memberId,
                 member: group.members[memberId],
@@ -265,9 +265,7 @@ contract Chama is IChama {
 
         if (group.id == 0) revert GroupNotFound();
 
-        uint256 currentRound = group.currentRound;
-
-        _payouts = new MemberPayout[](group.memberId - 1);
+        _payouts = new MemberPayout[](group.memberId);
 
         uint256 payout = group.contributionAmount * group.memberId;
 
