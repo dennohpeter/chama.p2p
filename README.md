@@ -8,6 +8,8 @@ Our goal? To help investors—across emerging markets and beyond—choose the be
 
 ---
 
+## Live Link:  [peerfi.netlify.com](https://peerfi.netlfiy.com)
+
 ## Problem We’re Solving
 
 Community-based financial practices like _Chamas_ and decentralized investment pools thrive in African and South Asian regions, supporting collective savings and micro-loans while driving economic growth. However, these traditional systems face critical challenges:
