@@ -1,9 +1,9 @@
 
 
-# Chama.P2P: Empowering Wealth Creation with Web3 Decentralized Investment Pools
+# Peerfi: Empowering Wealth Creation with Web3 Decentralized Investment Pools
 
 ## Overview
-Chama.P2P brings a time-tested financial practice—known as *Chamas* in  and *Decentralized Investment Pools* in others—into the world of cryptocurrency. These community-driven savings and investment pools have empowered millions by enabling collective savings, micro-loans, and randomized or auction-based disbursements. With Chama.P2P, we’re reimagining this model on Eigenlayer, a secure and cost-efficient Layer 2 solution, using a P2P framework in Web3 to democratize access to staking, restaking, and DeFi opportunities.
+Peerfi brings a time-tested financial practice—known as *Chamas* in  and *Decentralized Investment Pools* in others—into the world of cryptocurrency. These community-driven savings and investment pools have empowered millions by enabling collective savings, micro-loans, and randomized or auction-based disbursements. With Peerfi, we’re reimagining this model on Eigenlayer, a secure and cost-efficient Layer 2 solution, using a P2P framework in Web3 to democratize access to staking, restaking, and DeFi opportunities.
 
 Our goal? To help investors—across emerging markets and beyond—choose the best financial strategies with a low barrier to entry, leveraging familiar practices and cutting-edge blockchain tech. By integrating Eigenlayer’s API and building a tokenized reputation system, we’re creating a scalable, secure, and user-friendly platform that bridges traditional finance with crypto.
 
@@ -15,12 +15,12 @@ Community-based financial practices like *Chamas* and decentralized investment p
 - **Risk of Mismanagement**: Funds can be misused or unevenly distributed due to human oversight, eroding trust among members.
 - **Inefficient Utilization**: Without clear tracking, pooled money may not be optimally invested or disbursed, limiting returns and impact.
 
-Chama.P2P addresses these issues by bringing these practices on-chain with Web3 and Eigenlayer:
+Peerfi addresses these issues by bringing these practices on-chain with Web3 and Eigenlayer:
 - **Unmatched Transparency**: Every transaction, pool contribution, and disbursement is recorded on the blockchain, visible to all participants in real-time.
 - **immutable**: Built on a decentralized P2P framework with multisig wallets, funds are managed collectively—requiring group consensus, not individual control.
 - **Perfect DeFi Application**: Combines staking, restaking, and micro-loan compatibility into a secure, scalable system, maximizing returns and trust.
 
-This solution unlocks massive potential in emerging markets—where Eigenlayer can capitalize on high traffic and validator growth—while also offering significant opportunities in developed regions like the United States, where transparency and DeFi innovation resonate with savvy investors. Chama.P2P simplifies UX to help users pick the best strategies, reduces entry barriers with a wallet-based system, and tackles global issues like inflation and financial exclusion.
+This solution unlocks massive potential in emerging markets—where Eigenlayer can capitalize on high traffic and validator growth—while also offering significant opportunities in developed regions like the United States, where transparency and DeFi innovation resonate with savvy investors. Peerfi simplifies UX to help users pick the best strategies, reduces entry barriers with a wallet-based system, and tackles global issues like inflation and financial exclusion.
 
 ---
 
@@ -48,11 +48,11 @@ This solution unlocks massive potential in emerging markets—where Eigenlayer c
 ---
 
 ## Why P2P?
-Chama.P2P leverages a Peer-to-Peer (P2P) framework in Web3 to align with the decentralized spirit of community savings and maximize user empowerment. Here’s why P2P is core to our project:
+Peerfi leverages a Peer-to-Peer (P2P) framework in Web3 to align with the decentralized spirit of community savings and maximize user empowerment. Here’s why P2P is core to our project:
 - **Trustless Collaboration**: P2P eliminates intermediaries, ensuring funds are managed transparently via smart contracts—perfect for multisig pools.
 - **Global Reach**: P2P connectivity allows users worldwide to join and combine pools without geographic or institutional barriers.
 - **Restaking Innovation**: Using our sponsor’s P2P API, we enable decentralized restaking and pool combination (e.g., aggregating 32 ETH for validator status), distributing control and rewards across participants.
-- **Resilience**: A P2P network reduces single points of failure, making Chama.P2P robust against censorship or outages.
+- **Resilience**: A P2P network reduces single points of failure, making Peerfi robust against censorship or outages.
 - **Community-Driven**: P2P mirrors the grassroots nature of decentralized investment pools, fostering ownership and aligning with our tokenized reputation system.
 - **Sponsor Synergy**: Built with our sponsor’s P2P technology, we showcase its power for real-world financial use cases in Web3.
 
@@ -61,7 +61,7 @@ By embracing P2P, we’re scaling a proven model into a global, decentralized po
 ---
 
 ## Why Eigenlayer?
-Eigenlayer powers Chama.P2P with:
+Eigenlayer powers Peerfi with:
 - **Low Gas Fees**: Makes micro-transactions viable compared to Ethereum Layer 1.
 - **Robust Security**: Inherits Ethereum’s sophisticated security model.
 - **API Flexibility**: Enables fast proof generation and seamless staking/restaking integration.
@@ -109,7 +109,7 @@ By building on Eigenlayer, we’re driving validator adoption, increasing networ
 ## Installation
 1. Clone the repo:
    ```bash
-   git clone https://github.com/yourusername/chama.p2p.git
+   git clone https://github.com/yourusername/Peerfi.git
    ```
 2. Install dependencies:
    ```bash
