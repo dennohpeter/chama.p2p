@@ -62,7 +62,7 @@ contract ChamaTest is Test {
         }
 
         // vault balance should be equal to the contribution amount
-        assertEq(address(DEFAULT_VAULT).balance, contributionAmount);
+        assertEq(address(chama).balance, contributionAmount);
 
         console.log("Round Balance: ", roundBalance);
     }
@@ -164,17 +164,17 @@ contract ChamaTest is Test {
 
         // unstake i.e multisig vault sends funds to our smart contract
         // this is done by the vault owner
-        {
-            vm.startPrank(DEFAULT_VAULT);
-            console.log("Vault Balance: ", address(DEFAULT_VAULT).balance);
-            uint256 pot = contributionAmount * (members + 1);
+        // {
+        //     vm.startPrank(DEFAULT_VAULT);
+        //     console.log("Vault Balance: ", address(DEFAULT_VAULT).balance);
+        //     uint256 pot = contributionAmount * (members + 1);
 
-            (bool sent, ) = address(chama).call{value: pot}("");
+        //     (bool sent, ) = address(chama).call{value: pot}("");
 
-            require(sent, "Failed to send Ether");
+        //     require(sent, "Failed to send Ether");
 
-            vm.stopPrank();
-        }
+        //     vm.stopPrank();
+        // }
 
         chama.distribute(groupId);
 

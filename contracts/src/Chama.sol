@@ -9,7 +9,7 @@ contract Chama is IChama {
 
     mapping(uint256 => Group) public groups;
 
-    mapping(address => uint256) public balances;
+    mapping(uint256 => uint256) public balances;
 
     constructor() {}
 
@@ -89,7 +89,8 @@ contract Chama is IChama {
         if (group.joinFee > 0) {
             if (msg.value < group.joinFee) revert InsufficientJoinFee();
 
-            SafeTransferLib.safeTransferETH(group.vault, msg.value);
+            // SafeTransferLib.safeTransferETH(group.vault, msg.value);
+            balances[groupId] += msg.value;
 
             emit JoinFeePaid(_id, msg.sender, group.joinFee);
         }
@@ -122,8 +123,10 @@ contract Chama is IChama {
         if (msg.value > group.contributionAmount)
             revert ExcessContribution(group.contributionAmount, msg.value);
 
-        SafeTransferLib.safeTransferETH(group.vault, msg.value);
+        // SafeTransferLib.safeTransferETH(group.vault, msg.value);
         group.roundBalance[currentRound] += msg.value;
+
+        balances[groupId] += msg.value;
 
         group.roundContributions[currentRound][memberId] = msg.value;
 
@@ -283,7 +286,5 @@ contract Chama is IChama {
         }
     }
 
-    receive() external payable {
-        balances[msg.sender] += msg.value;
-    }
+    receive() external payable {}
 }
