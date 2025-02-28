@@ -128,13 +128,19 @@ _Note_: Due to Testnet(Which is not currently active) constraints, we stop at tr
 1. Clone the repo:
    ```bash
    git clone https://github.com/dennohpeter/chama.p2p.git
+   cd chama.p2p
+   cd frontend
    ```
 2. Install dependencies:
    ```bash
-   cd frontend
    yarn
    ```
 3. Configure P2P API keys (see `.env.example`).
+
+   ```bash
+      cp .env.example .env
+   ```
+
 4. Run locally:
    ```bash
    yarn dev
@@ -144,6 +150,7 @@ _Note_: Due to Testnet(Which is not currently active) constraints, we stop at tr
 
 ## Future Roadmap
 
+- Integrate Lending Protocols for Micro-Loan Functionality
 - Integrate slashing insurance smart contracts.
 - Partner with lending protocols for micro-loan functionality.
 - Expand reputation system with off-chain data (e.g., KYC lite) for bigger pools.
