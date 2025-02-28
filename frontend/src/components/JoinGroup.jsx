@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import {
   useAccount,
   useBlockNumber,
@@ -27,7 +26,12 @@ const CYCLE_DAYS = {
 
 const JoinGroup = () => {
   const { address: user } = useAccount()
-  const { data: depositHash, sendTransaction } = useSendTransaction()
+  const {
+    data: depositHash,
+    isPending: depositIsPending,
+    error: depositError,
+    sendTransaction,
+  } = useSendTransaction()
 
   const {
     data: contributeHash,
@@ -93,25 +97,22 @@ const JoinGroup = () => {
         .map((m) => ({ ...m.result })) || []
   }
 
-  let { data: roundBalance } = useReadContracts({
-    contracts: groups.map((g) => ({
-      address: CHAMA_CONTRACT_ADDRESS,
-      abi: ABI,
-      functionName: 'roundBalance',
-      args: [g.id, g.currentRound],
-    })),
-    query: {
-      enabled: groups.length > 0,
-    },
-  })
-
-  console.log('Round Balance:', roundBalance)
+  // let { data: roundBalance } = useReadContracts({
+  //   contracts: groups.map((g) => ({
+  //     address: CHAMA_CONTRACT_ADDRESS,
+  //     abi: ABI,
+  //     functionName: 'roundBalance',
+  //     args: [g.id, g.currentRound],
+  //   })),
+  //   query: {
+  //     enabled: groups.length > 0,
+  //   },
+  // })
 
   const { data: blockNumber } = useBlockNumber({ watch: true })
 
   useEffect(() => {
     if (Number(blockNumber) % 5 === 0) refetch() // refetch every 5 blocks
-    console.log('Block Number:', blockNumber)
   }, [refetch, blockNumber])
 
   const handleContribute = async (groupId) => {
@@ -203,12 +204,6 @@ const JoinGroup = () => {
   const handleRestaking = async (groupId) => {
     console.log(`Restaking for group ${groupId}...`)
 
-    const eigenPodOwnerAddress = user
-    const feeRecipientAddress = user
-    const controllerAddress = user
-
-    const uuid = uuidv4()
-
     toast('Initiating restaking request...', {
       type: 'info',
       toastId: 'restake-initiating',
@@ -216,14 +211,15 @@ const JoinGroup = () => {
     let restakingResponse
 
     try {
+      const eigenPodOwnerAddress = user
+      const feeRecipientAddress = user
+      const controllerAddress = user
+
       restakingResponse = await createRestakeRequest(
-        uuid,
         eigenPodOwnerAddress,
         feeRecipientAddress,
         controllerAddress,
       )
-
-      console.log('Restaking Response:', restakingResponse)
 
       toast('Restaking request initiated!', {
         type: 'success',
@@ -268,9 +264,9 @@ const JoinGroup = () => {
         })
 
         sendTransaction({
-          to: depositTxResponse.result.to,
-          value: depositTxResponse.result.value,
-          data: depositTxResponse.result.data,
+          to: depositTxResponse.to,
+          data: depositTxResponse.data,
+          value: depositTxResponse.value,
         })
       } catch (error) {
         toast.error(`Failed to create deposit transaction: ${error.message}`, {
@@ -281,6 +277,55 @@ const JoinGroup = () => {
       toast.error(`Failed to initiate restaking: ${error.message}`, {
         toastId: 'restake-error',
       })
+    }
+  }
+
+  const {
+    isLoading: depositIsConfirming,
+    depositIsSuccess: depositIsConfirmed,
+  } = useWaitForTransactionReceipt({
+    hash: depositHash,
+  })
+
+  {
+    if (depositIsPending) {
+      toast('Deposit transaction in progress...', {
+        type: 'info',
+        toastId: 'deposit-pending',
+      })
+    }
+
+    if (depositIsConfirming) {
+      toast('Confirming deposit transaction...', {
+        type: 'info',
+        toastId: 'deposit-confirming',
+      })
+    }
+
+    if (depositIsConfirmed) {
+      toast('Deposit transaction confirmed!', {
+        type: 'success',
+        toastId: 'deposit-confirmed',
+      })
+    }
+
+    if (depositHash) {
+      toast('Deposit transaction sent!', {
+        type: 'success',
+        toastId: 'deposit-success',
+      })
+    }
+
+    if (depositError) {
+      toast(
+        `Failed to deposit: ${
+          depositError.shortMessage || depositError.message
+        }`,
+        {
+          type: 'error',
+          toastId: 'deposit-error',
+        },
+      )
     }
   }
 
@@ -327,8 +372,9 @@ const JoinGroup = () => {
                 <button
                   onClick={() => handleRestaking(group.id)}
                   className="mt-4 py-1 px-4 bg-white text-gray-700 rounded hover:bg-gray-400 hover:text-white cursor-pointer"
+                  disabled={depositIsPending}
                 >
-                  Re/stake
+                  {depositIsPending ? 'Restaking...' : 'Re/stake'}
                 </button>
               ) : !members
                   .map((m, i) => m[i].member.toLowerCase())

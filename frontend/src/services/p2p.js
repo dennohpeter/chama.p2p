@@ -1,32 +1,20 @@
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
-// const headers = {
-//   accept: 'application/json',
-//   authorization: `Bearer ${import.meta.env.VITE_P2P_API_KEY}`,
-//   'content-type': 'application/json',
-//   'Access-Control-Allow-Credentials': true,
-// }
-
-function getAuthorizationHeaders() {
-  return {
-    accept: 'application/json',
-    authorization: `Bearer ${import.meta.env.VITE_P2P_API_KEY}`,
-    'content-type': 'application/json',
-    withCredentials: false,
-  }
+const headers = {
+  accept: 'application/json',
+  authorization: `Bearer ${import.meta.env.VITE_P2P_API_KEY}`,
+  'content-type': 'application/json',
 }
 
-const P2P_BASE_URL = 'https://api.p2p.org/'
+const P2P_BASE_URL =
+  import.meta.env.VITE_P2P_BASE_URL ||
+  'https://api-test-holesky.p2p.org/api/v1/'
 
 export const createEigenPod = async () => {
   const url = `${P2P_BASE_URL}eth/staking/eigenlayer/tx/create-pod`
   try {
-    const response = await axios.post(
-      url,
-      {},
-      { headers: getAuthorizationHeaders() },
-    )
+    const response = await axios.post(url, {}, { headers })
     console.log('EigenPod Creation Response:', response.data)
     return response.data.result
   } catch (error) {
@@ -55,10 +43,15 @@ export const createRestakeRequest = async (
     nodesOptions: { location: 'any', relaysSet: null },
   }
   try {
-    const response = await axios.post(url, data, {
-      headers: getAuthorizationHeaders(),
+    const response = await axios({
+      method: 'post',
+      url,
+      data,
+      headers,
+      credentials: 'same-origin',
+      mode: 'no-cors',
     })
-    console.log('Restake Request Response:', response.data)
+
     return { uuid, result: response.data.result }
   } catch (error) {
     console.error(
@@ -78,7 +71,7 @@ export const getRestakeStatusWithRetry = async (
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await axios.get(url, {
-        headers: getAuthorizationHeaders(),
+        headers,
       })
       console.log(`Attempt ${attempt}: Restake Status Response:`, response.data)
       if (response.data.result.status !== 'processing') {
@@ -111,7 +104,7 @@ export const createDepositTx = async (result) => {
   }
   try {
     const response = await axios.post(url, data, {
-      headers: getAuthorizationHeaders(),
+      headers,
     })
     console.log('Deposit Transaction Response:', response.data)
     let pubkey = depositData.pubkey
