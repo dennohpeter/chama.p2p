@@ -24,7 +24,7 @@ const App = () => {
       <BrowserRouter>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider initialChain={holesky}>
+            <RainbowKitProvider initialChain={sepolia}>
               <Routes>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/Dashboard" element={<DashboardPage />} />

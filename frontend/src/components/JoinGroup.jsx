@@ -1,14 +1,21 @@
 import { useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import {
   useAccount,
   useBlockNumber,
   useReadContracts,
+  useSendTransaction,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from 'wagmi'
 import { ABI, CHAMA_CONTRACT_ADDRESS } from '../constants'
 import { formatEther } from 'viem'
 import { ToastContainer, toast } from 'react-toastify'
+import {
+  createDepositTx,
+  createRestakeRequest,
+  getRestakeStatusWithRetry,
+} from '../services'
 
 const CYCLE_DAYS = {
   1: 'Daily',
@@ -20,6 +27,8 @@ const CYCLE_DAYS = {
 
 const JoinGroup = () => {
   const { address: user } = useAccount()
+  const { data: depositHash, sendTransaction } = useSendTransaction()
+
   const {
     data: contributeHash,
     error: contributeError,
@@ -77,16 +86,12 @@ const JoinGroup = () => {
     },
   })
 
-  console.log('Members:', members)
-
   {
     members =
       members
         ?.filter((member) => member.result)
         .map((m) => ({ ...m.result })) || []
   }
-
-  console.log('Members:', members)
 
   let { data: roundBalance } = useReadContracts({
     contracts: groups.map((g) => ({
@@ -103,8 +108,6 @@ const JoinGroup = () => {
   console.log('Round Balance:', roundBalance)
 
   const { data: blockNumber } = useBlockNumber({ watch: true })
-
-  console.log('Groups:', groups)
 
   useEffect(() => {
     if (Number(blockNumber) % 5 === 0) refetch() // refetch every 5 blocks
@@ -197,6 +200,90 @@ const JoinGroup = () => {
     }
   }
 
+  const handleRestaking = async (groupId) => {
+    console.log(`Restaking for group ${groupId}...`)
+
+    const eigenPodOwnerAddress = user
+    const feeRecipientAddress = user
+    const controllerAddress = user
+
+    const uuid = uuidv4()
+
+    toast('Initiating restaking request...', {
+      type: 'info',
+      toastId: 'restake-initiating',
+    })
+    let restakingResponse
+
+    try {
+      restakingResponse = await createRestakeRequest(
+        uuid,
+        eigenPodOwnerAddress,
+        feeRecipientAddress,
+        controllerAddress,
+      )
+
+      console.log('Restaking Response:', restakingResponse)
+
+      toast('Restaking request initiated!', {
+        type: 'success',
+        toastId: 'restake-success',
+      })
+
+      let restakeStatus
+
+      try {
+        toast('Checking restaking status...', {
+          type: 'info',
+          toastId: 'restake-status',
+        })
+        restakeStatus = await getRestakeStatusWithRetry(restakingResponse.uuid)
+
+        console.log('Restaking Status:', restakeStatus)
+      } catch (error) {
+        toast.error(`Failed to get restaking status: ${error.message}`, {
+          toastId: 'restake-status-error',
+        })
+      }
+
+      let depositTxResponse
+
+      try {
+        toast('Creating deposit transaction...', {
+          type: 'info',
+          toastId: 'restake-deposit-tx',
+        })
+        depositTxResponse = await createDepositTx(restakeStatus)
+
+        console.log('Deposit Transaction Response:', depositTxResponse)
+
+        toast('Deposit transaction created!', {
+          type: 'success',
+          toastId: 'restake-deposit-tx-success',
+        })
+
+        toast('Sending deposit transaction...', {
+          type: 'info',
+          toastId: 'restake-deposit-tx-sending',
+        })
+
+        sendTransaction({
+          to: depositTxResponse.result.to,
+          value: depositTxResponse.result.value,
+          data: depositTxResponse.result.data,
+        })
+      } catch (error) {
+        toast.error(`Failed to create deposit transaction: ${error.message}`, {
+          toastId: 'restake-deposit-tx-error',
+        })
+      }
+    } catch (error) {
+      toast.error(`Failed to initiate restaking: ${error.message}`, {
+        toastId: 'restake-error',
+      })
+    }
+  }
+
   return (
     <div className="p-5 font-funnel">
       <h1 className="text-3xl font-bold mb-4 font-orbitron">
@@ -236,24 +323,23 @@ const JoinGroup = () => {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {group.creator.toLowerCase() === user.toLowerCase() && (
+              {group.creator.toLowerCase() === user.toLowerCase() ? (
                 <button
-                  // onClick={() => handleJoinGroup(group)}
+                  onClick={() => handleRestaking(group.id)}
                   className="mt-4 py-1 px-4 bg-white text-gray-700 rounded hover:bg-gray-400 hover:text-white cursor-pointer"
                 >
-                  Stake Pool
+                  Re/stake
                 </button>
-              )}
-              {!members
-                .map((m, i) => m[i].member.toLowerCase())
-                .includes(user.toLowerCase()) && (
+              ) : !members
+                  .map((m, i) => m[i].member.toLowerCase())
+                  .includes(user.toLowerCase()) ? (
                 <button
                   onClick={() => handleJoinGroup(group.id)}
                   className="mt-4 py-1 px-4 bg-white text-gray-700 rounded hover:bg-gray-400 hover:text-white cursor-pointer"
                 >
                   Join
                 </button>
-              )}
+              ) : null}
 
               <button
                 onClick={() => handleContribute(group.id)}
